@@ -75,14 +75,14 @@
 
 			<PropertyTitle
 				:value="title"
-				:is-read-only="isReadOnly"
+				:is-read-only="isReadOnly || isViewedByAttendee"
 				@update:value="updateTitle" />
 
 			<PropertyCalendarPicker
 				v-if="showCalendarPicker"
 				:calendars="calendars"
 				:calendar="selectedCalendar"
-				:is-read-only="isReadOnly"
+				:is-read-only="isReadOnly || isViewedByAttendee"
 				@selectCalendar="changeCalendar" />
 
 			<PropertyTitleTimePicker
@@ -91,7 +91,7 @@
 				:end-date="endDate"
 				:end-timezone="endTimezone"
 				:is-all-day="isAllDay"
-				:is-read-only="isReadOnly"
+				:is-read-only="isReadOnly || isViewedByAttendee"
 				:can-modify-all-day="canModifyAllDay"
 				:user-timezone="currentUserTimezone"
 				@updateStartDate="updateStartDate"
@@ -102,24 +102,24 @@
 
 			<PropertyText
 				v-if="hasLocation"
-				:is-read-only="isReadOnly"
+				:is-read-only="isReadOnly || isViewedByAttendee"
 				:prop-model="rfcProps.location"
 				:value="location"
 				@update:value="updateLocation" />
 			<PropertyText
 				v-if="hasDescription"
-				:is-read-only="isReadOnly"
+				:is-read-only="isReadOnly || isViewedByAttendee"
 				:prop-model="rfcProps.description"
 				:value="description"
 				@update:value="updateDescription" />
 
 			<SaveButtons
-				v-if="!isReadOnly"
 				class="event-popover__buttons"
 				:can-create-recurrence-exception="canCreateRecurrenceException"
 				:is-new="isNew"
 				:force-this-and-all-future="forceThisAndAllFuture"
 				:show-more-button="true"
+				:is-read-only="isReadOnly || isViewedByAttendee"
 				@saveThisOnly="saveAndLeave(false)"
 				@saveThisAndAllFuture="saveAndLeave(true)"
 				@showMore="showMore" />

@@ -27,6 +27,7 @@ import {
 	mapState,
 } from 'vuex'
 import { translate as t } from '@nextcloud/l10n'
+import { removeMailtoPrefix } from '../utils/attendee'
 
 /**
  * This is a mixin for the editor. It contains common Vue stuff, that is
@@ -208,6 +209,19 @@ export default {
 			return calendar.readOnly
 		},
 		/**
+		 * Returns whether or not an attendee is viewing the event
+		 *
+		 * @return {boolean}
+		 */
+		isViewedByAttendee() {
+			if (!this.calendarObjectInstance.organizer) {
+				return false
+			}
+
+			const principal = removeMailtoPrefix(this.$store.getters.getCurrentUserPrincipalEmail)
+			return removeMailtoPrefix(this.calendarObjectInstance.organizer.uri) !== principal
+		},
+		/**
 		 * Returns all calendars selectable by the user
 		 *
 		 * @return {object[]}
@@ -255,6 +269,9 @@ export default {
 				return false
 			}
 			if (this.isLoading) {
+				return false
+			}
+			if (this.isViewedByAttendee) {
 				return false
 			}
 

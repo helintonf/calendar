@@ -34,7 +34,7 @@
 			{{ commonName }}
 		</div>
 		<div class="invitees-list-item__actions">
-			<Actions v-if="isViewedByOrganizer">
+			<Actions v-if="!isReadOnly && isViewedByOrganizer">
 				<ActionCheckbox
 					:checked="attendee.rsvp"
 					@change="toggleRSVP">
@@ -106,6 +106,10 @@ export default {
 			type: Boolean,
 			required: true,
 		},
+		isViewedByOrganizer: {
+			type: Boolean,
+			required: true,
+		},
 	},
 	computed: {
 		avatarLink() {
@@ -137,10 +141,6 @@ export default {
 		},
 		isNonParticipant() {
 			return this.attendee.role === 'NON-PARTICIPANT'
-		},
-		isViewedByOrganizer() {
-			// TODO: check if also viewed by organizer
-			return !this.isReadOnly
 		},
 	},
 	methods: {
