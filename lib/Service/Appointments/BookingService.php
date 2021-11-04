@@ -25,10 +25,9 @@ declare(strict_types=1);
 
 namespace OCA\Calendar\Service\Appointments;
 
-use OC\Calendar\CalendarQuery;
+use DateTime;
 use OCA\Calendar\Db\AppointmentConfig;
-use OCA\Calendar\Db\AppointmentConfigMapper;
-use OCP\Calendar\IManager;
+use OCA\Calendar\Exception\ServiceException;
 
 class BookingService {
 
@@ -44,19 +43,36 @@ class BookingService {
 	/** @var EventConflictFilter */
 	private $eventConflictFilter;
 
+	/** @var BookingCalendarWriter */
+	private $calendarWriter;
+
 	public function __construct(AvailabilityGenerator $availabilityGenerator,
 								SlotExtrapolator $extrapolator,
 								DailyLimitFilter $dailyLimitFilter,
-								EventConflictFilter $eventConflictFilter) {
+								EventConflictFilter $eventConflictFilter,
+								BookingCalendarWriter $calendarWriter) {
 		$this->availabilityGenerator = $availabilityGenerator;
 		$this->extrapolator = $extrapolator;
 		$this->dailyLimitFilter = $dailyLimitFilter;
 		$this->eventConflictFilter = $eventConflictFilter;
+		$this->calendarWriter = $calendarWriter;
 	}
 
 	// CREATE
-	public function book(int $startTimeInTz, int $endTimeInTz, AppointmentConfig $config, int $start) {
-		$slots = $this->getAvailableSlots($config, $startTimeInTz, $endTimeInTz);
+	public function book(AppointmentConfig $config, DateTime $startTimeInTz, DateTime $endTimeInTz, int $start, string $name, string $email, string $description): Interval {
+		$slots = $this->getAvailableSlots($config, $startTimeInTz->getTimestamp(), $endTimeInTz->getTimestamp());
+		$bookingSlot = current(array_filter($slots, static function ($slot) use ($start) {
+			return $slot->getStart() === $start;
+		}));
+
+		if (!$bookingSlot) {
+			throw new ServiceException('Could not find slot for booking');
+		}
+
+		// Pass the $startTimeInTz to get the Timezone for the booker
+		$this->calendarWriter->write($config, $startTimeInTz, $name, $email, $description);
+
+		return $bookingSlot;
 	}
 
 	/**
