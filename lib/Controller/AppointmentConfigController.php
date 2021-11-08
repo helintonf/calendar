@@ -121,7 +121,6 @@ class AppointmentConfigController extends Controller {
 		array $freebusyUris = null,
 		?int $start = null,
 		?int $end = null): JsonResponse {
-
 		if ($this->userId === null) {
 			return JsonResponse::fail();
 		}
